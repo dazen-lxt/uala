@@ -9,9 +9,12 @@ import SwiftUI
 
 @main
 struct UalaApp: App {
+    
+    let container = AppContainer()
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            container.makeCityListView()
         }
     }
 }
