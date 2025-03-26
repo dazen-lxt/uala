@@ -57,11 +57,37 @@ final class CityListViewModelTests: XCTestCase {
         try? await Task.sleep(nanoseconds: 100_000_000)
         XCTAssertGreaterThan(viewModel.cities.count, initialCount)
     }
+    
+    func test_loadFavorites_setsFavoritesFromRepo() async {
+        mockRepo.storedFavorites = [1, 2, 3]
+
+        await viewModel.loadFavorites()
+
+        XCTAssertEqual(viewModel.favorites, Set([1, 2, 3]))
+    }
+
+    func test_toggleFavorite_addsFavoriteIfNotExists() async {
+        await viewModel.toggleFavorite(for: 42)
+
+        XCTAssertTrue(viewModel.favorites.contains(42))
+        XCTAssertTrue(mockRepo.storedFavorites.contains(42))
+    }
+
+    func test_toggleFavorite_removesFavoriteIfAlreadyExists() async {
+        mockRepo.storedFavorites = [99]
+        viewModel.favorites = [99]
+
+        await viewModel.toggleFavorite(for: 99)
+
+        XCTAssertFalse(viewModel.favorites.contains(99))
+        XCTAssertFalse(mockRepo.storedFavorites.contains(99))
+    }
 }
 
 final class MockCityRepository: CityRepositoryProtocol {
     var allCities: [City] = []
-
+    var storedFavorites: Set<Int> = []
+    
     init(total: Int = 20) {
         allCities = (0..<total).map {
             City(id: $0, country: "AR", name: "City \($0)", coord: .init(lat: 0, lon: 0))
@@ -77,5 +103,17 @@ final class MockCityRepository: CityRepositoryProtocol {
         } else {
             return []
         }
+    }
+    
+    func fetchFavorites() async throws -> [Int] {
+        return Array(storedFavorites)
+    }
+
+    func addFavorite(_ cityId: Int) async throws {
+        storedFavorites.insert(cityId)
+    }
+
+    func removeFavorite(_ cityId: Int) async throws {
+        storedFavorites.remove(cityId)
     }
 }

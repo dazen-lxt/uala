@@ -24,7 +24,16 @@ struct CityListView: View {
                 List {
                     ForEach(cityListViewModel.cities.indices, id: \.self) { index in
                         let city = $cityListViewModel.cities[index]
-                        CityCellView(city: city)
+                        CityCellView(city: city, isFavorite: Binding(
+                            get: {
+                                cityListViewModel.favorites.contains(city.id)
+                            },
+                            set: { _ in
+                                Task {
+                                    await cityListViewModel.toggleFavorite(for: city.id)
+                                }
+                            }
+                        ))
                             .onAppear {
                                 Task {
                                     await cityListViewModel.loadMoreIfNeeded(for: index)
@@ -41,6 +50,7 @@ struct CityListView: View {
                 
             }
             .task {
+                await cityListViewModel.loadFavorites()
                 await cityListViewModel.loadCities(reset: false)
             }
             .navigationTitle("Cities")

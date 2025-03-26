@@ -9,8 +9,10 @@
 
 final class MockCityRepository: CityRepositoryProtocol {
     
+    
     private let totalCities: Int
     private var allCities: [City] = []
+    private var favorites = [2, 3, 5, 11, 101]
 
     init(totalCities: Int = 10) {
         self.totalCities = totalCities
@@ -45,6 +47,18 @@ final class MockCityRepository: CityRepositoryProtocol {
             }
         }
         allCities.sort { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+    }
+    
+    func fetchFavorites() async throws -> [Int] {
+        return favorites
+    }
+    
+    func addFavorite(_ cityId: Int) async throws {
+        favorites.append(cityId)
+    }
+    
+    func removeFavorite(_ cityId: Int) async throws {
+        favorites.removeAll(where: { $0 == cityId })
     }
 }
 

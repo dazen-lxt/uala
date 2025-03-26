@@ -14,6 +14,7 @@ final class CityListViewModel: ObservableObject {
     @Published var cities: [City] = []
     @Published var isFetching: Bool = false
     @Published var filterTerm: String = ""
+    @Published var favorites: Set<Int> = []
     
     // MARK: - Private Properties
     private let cityRepostiory: CityRepositoryProtocol
@@ -54,7 +55,13 @@ final class CityListViewModel: ObservableObject {
         isFetching = true
         defer { isFetching = false }
         do {
-            let data = try await cityRepostiory.fetchCities(prefix: filterTerm, page: nextPage, pageSize: pageSize)
+            let data = try await Task.detached(priority: .userInitiated) {
+                try await self.cityRepostiory.fetchCities(
+                    prefix: self.filterTerm,
+                    page: self.nextPage,
+                    pageSize: self.pageSize
+                )
+            }.value
             if data.isEmpty {
                 allDataLoaded = true
                 return
@@ -72,6 +79,35 @@ final class CityListViewModel: ObservableObject {
             Task {
                 await loadCities(reset: false)
             }
+        }
+    }
+    
+    func loadFavorites() async {
+        do {
+            let favorites = try await cityRepostiory.fetchFavorites()
+            await MainActor.run {
+                self.favorites = Set(favorites)
+            }
+        } catch {
+            print("❌ Error fetching favorites: \(error.localizedDescription)")
+        }
+    }
+    
+    func toggleFavorite(for cityId: Int) async {
+        do {
+            if favorites.contains(cityId) {
+                try await cityRepostiory.removeFavorite(cityId)
+                _ = await MainActor.run {
+                    favorites.remove(cityId)
+                }
+            } else {
+                try await cityRepostiory.addFavorite(cityId)
+                _ = await MainActor.run {
+                    favorites.insert(cityId)
+                }
+            }
+        } catch {
+            print("❌ Error saving favorite for city \(cityId): \(error.localizedDescription)")
         }
     }
 }

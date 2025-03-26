@@ -17,7 +17,7 @@ final class CityStorage: CityStorageProtocol {
         self.context = context
     }
     
-    // MARK: - Internal Methods
+    // MARK: - Cities Methods
     func fetchPagedCitiesFromCoreData(prefix: String, page: Int, pageSize: Int) throws -> [City] {
         let request: NSFetchRequest<CityEntity> = CityEntity.fetchRequest()
         request.fetchOffset = page * pageSize
@@ -63,6 +63,40 @@ final class CityStorage: CityStorageProtocol {
                 print("❌ Error saving cities: \(error)")
                 context.rollback()
             }
+        }
+    }
+    
+    
+    // MARK: - Favorites Methods
+    func fetchFavorites() async throws -> [Int] {
+        let request: NSFetchRequest<FavoriteEntity> = FavoriteEntity.fetchRequest()
+        let results = try context.fetch(request)
+        return results.map { Int($0.cityId) }
+    }
+    
+    func addFavorite(_ cityId: Int) async throws {
+        try await context.perform {
+            let request: NSFetchRequest<FavoriteEntity> = FavoriteEntity.fetchRequest()
+            request.predicate = NSPredicate(format: "cityId == %d", cityId)
+            let existing = try self.context.fetch(request)
+            guard existing.isEmpty else { return }
+
+            let entity = FavoriteEntity(context: self.context)
+            entity.cityId = Int64(cityId)
+
+            try self.context.save()
+        }
+    }
+    
+    func removeFavorite(_ cityId: Int) async throws {
+        try await context.perform {
+            let request: NSFetchRequest<FavoriteEntity> = FavoriteEntity.fetchRequest()
+            request.predicate = NSPredicate(format: "cityId == %d", cityId)
+            let results = try self.context.fetch(request)
+
+            results.forEach { self.context.delete($0) }
+
+            try self.context.save()
         }
     }
 }

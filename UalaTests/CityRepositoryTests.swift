@@ -71,6 +71,26 @@ final class CityRepositoryTests: XCTestCase {
         XCTAssertEqual(result.count, 2)
         XCTAssertEqual(result.map(\.name), ["City BA", "City BC"])
     }
+    
+    func test_addFavorite_addsToStorage() async throws {
+        try await repository.addFavorite(777)
+        let stored = try await mockStorage.fetchFavorites()
+        XCTAssertTrue(stored.contains(777))
+    }
+
+    func test_removeFavorite_removesFromStorage() async throws {
+        try await repository.addFavorite(555)
+        try await repository.removeFavorite(555)
+        let stored = try await mockStorage.fetchFavorites()
+        XCTAssertFalse(stored.contains(555))
+    }
+
+    func test_fetchFavorites_readsFromStorage() async throws {
+        try await mockStorage.addFavorite(12)
+        try await mockStorage.addFavorite(34)
+        let favorites = try await repository.fetchFavorites()
+        XCTAssertEqual(Set(favorites), Set([12, 34]))
+    }
 }
 
 final class MockCityService: CityServiceProtocol {
@@ -86,6 +106,7 @@ final class MockCityStorage: CityStorageProtocol {
     var saveCalled = false
     var fetchCalled = false
     var stubbedCities: [City] = []
+    var storedFavorites: Set<Int> = []
 
     func fetchPagedCitiesFromCoreData(prefix: String, page: Int, pageSize: Int) throws -> [City] {
         fetchCalled = true
@@ -98,5 +119,17 @@ final class MockCityStorage: CityStorageProtocol {
 
     func saveCities(_ cities: [City]) {
         saveCalled = true
+    }
+    
+    func fetchFavorites() async throws -> [Int] {
+        return Array(storedFavorites)
+    }
+
+    func addFavorite(_ cityId: Int) async throws {
+        storedFavorites.insert(cityId)
+    }
+
+    func removeFavorite(_ cityId: Int) async throws {
+        storedFavorites.remove(cityId)
     }
 }

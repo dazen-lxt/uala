@@ -91,4 +91,33 @@ final class CityStorageTests: XCTestCase {
 
         XCTAssertTrue(try storage.hasStoredCities())
     }
+    
+    func test_addFavorite_savesFavorite() async throws {
+        try await storage.addFavorite(42)
+        let ids = try await storage.fetchFavorites()
+        XCTAssertTrue(ids.contains(42))
+    }
+
+    func test_addFavorite_doesNotDuplicate() async throws {
+        try await storage.addFavorite(42)
+        try await storage.addFavorite(42)
+        let ids = try await storage.fetchFavorites()
+        XCTAssertEqual(ids.filter { $0 == 42 }.count, 1)
+    }
+
+    func test_removeFavorite_deletesFavorite() async throws {
+        try await storage.addFavorite(100)
+        try await storage.removeFavorite(100)
+        let ids = try await storage.fetchFavorites()
+        XCTAssertFalse(ids.contains(100))
+    }
+
+    func test_fetchFavorites_returnsAllSavedFavorites() async throws {
+        try await storage.addFavorite(1)
+        try await storage.addFavorite(2)
+        try await storage.addFavorite(3)
+
+        let favorites = try await storage.fetchFavorites()
+        XCTAssertEqual(Set(favorites), Set([1, 2, 3]))
+    }
 }

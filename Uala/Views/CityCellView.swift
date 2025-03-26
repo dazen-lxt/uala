@@ -10,11 +10,12 @@ import SwiftUI
 struct CityCellView: View {
     
     @Binding var city: City
+    @Binding var isFavorite: Bool
     
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text(city.name)
+                Text("\(city.name), \(city.country)")
                     .font(.headline)
                 Text("Lat: \(city.coord.lat), Lon: \(city.coord.lon)")
                     .font(.subheadline)
@@ -22,9 +23,11 @@ struct CityCellView: View {
             }
             Spacer()
             Button(action: {
+                isFavorite.toggle()
             }) {
-                Image(systemName:"star.fill")
-                    .foregroundColor(.yellow)
+                Image(systemName: isFavorite ? "star.fill" : "star")
+                    .foregroundColor(isFavorite ? .yellow : .gray)
+                    .animation(.easeInOut(duration: 0.2), value: isFavorite)
             }
             .buttonStyle(.plain)
         }

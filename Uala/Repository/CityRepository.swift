@@ -36,6 +36,18 @@ final class CityRepository: CityRepositoryProtocol {
         return try cityStorage.fetchPagedCitiesFromCoreData(prefix: prefix, page: page, pageSize: pageSize)
     }
     
+    func fetchFavorites() async throws -> [Int] {
+        return try await cityStorage.fetchFavorites()
+    }
+    
+    func addFavorite(_ cityId: Int) async throws {
+        try await cityStorage.addFavorite(cityId)
+    }
+    
+    func removeFavorite(_ cityId: Int) async throws {
+        try await cityStorage.removeFavorite(cityId)
+    }
+    
     // MARK: - Private Methods
     private func getPagedCitiesFromCachedService(prefix: String, page: Int, pageSize: Int) -> [City] {
         let filteredCities = citiesFromService
