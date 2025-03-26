@@ -21,9 +21,9 @@ final class CityRepository: CityRepositoryProtocol {
     }
     
     // MARK: - Internal Methods
-    func fetchCities(page: Int, pageSize: Int) async throws -> [City] {
+    func fetchCities(prefix: String, page: Int, pageSize: Int) async throws -> [City] {
         if !citiesFromService.isEmpty {
-            return getPagedCitiesFromService(page: page, pageSize: pageSize)
+            return getPagedCitiesFromCachedService(prefix: prefix, page: page, pageSize: pageSize)
         }
         if isSeeded == nil {
             isSeeded = try cityStorage.hasStoredCities()
@@ -31,21 +31,24 @@ final class CityRepository: CityRepositoryProtocol {
         if isSeeded == false {
             try await loadAllCities()
             cityStorage.saveCities(citiesFromService)
-            return getPagedCitiesFromService(page: page, pageSize: pageSize)
+            return getPagedCitiesFromCachedService(prefix: prefix, page: page, pageSize: pageSize)
         }
-        return try cityStorage.fetchPagedCitiesFromCoreData(page: page, pageSize: pageSize)
-    }
-    
-   
-    
-    private func getPagedCitiesFromService(page: Int, pageSize: Int) -> [City] {
-        let start = page * pageSize
-        let end = min(start + pageSize, citiesFromService.count)
-        guard start < end else { return [] }
-        return Array(citiesFromService[start..<end])
+        return try cityStorage.fetchPagedCitiesFromCoreData(prefix: prefix, page: page, pageSize: pageSize)
     }
     
     // MARK: - Private Methods
+    private func getPagedCitiesFromCachedService(prefix: String, page: Int, pageSize: Int) -> [City] {
+        let filteredCities = citiesFromService
+            .filter { city in
+                city.name.lowercased().hasPrefix(prefix.lowercased())
+            }
+            .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        let start = page * pageSize
+        let end = min(start + pageSize, filteredCities.count)
+        guard start < end else { return [] }
+        return Array(filteredCities[start..<end])
+    }
+    
     private func loadAllCities() async throws {
         citiesFromService = try await cityService.fetchCities()
     }

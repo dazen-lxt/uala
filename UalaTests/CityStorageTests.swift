@@ -48,8 +48,36 @@ final class CityStorageTests: XCTestCase {
         }
         try coreDataStack.context.save()
 
-        let page = try storage.fetchPagedCitiesFromCoreData(page: 1, pageSize: 5)
+        let page = try storage.fetchPagedCitiesFromCoreData(prefix: "", page: 1, pageSize: 5)
         XCTAssertEqual(page.count, 5)
+    }
+    
+    func test_fetchPagedCitiesFromCoreData_returnsCorrectPrefix() throws {
+        let entityA = CityEntity(context: coreDataStack.context)
+        entityA.id = 1
+        entityA.name = "Z City"
+        entityA.country = "Test"
+        entityA.latitude = 0
+        entityA.longitude = 0
+        let entityB = CityEntity(context: coreDataStack.context)
+        entityB.id = 2
+        entityB.name = "B City"
+        entityB.country = "Test"
+        entityB.latitude = 0
+        entityB.longitude = 0
+        let entityC = CityEntity(context: coreDataStack.context)
+        entityC.id = 3
+        entityC.name = "W City"
+        entityC.country = "Test"
+        entityC.latitude = 0
+        entityC.longitude = 0
+        try coreDataStack.context.save()
+
+        let data = try storage.fetchPagedCitiesFromCoreData(prefix: "W", page: 0, pageSize: 5)
+        XCTAssertEqual(data.count, 1)
+        XCTAssertEqual(data[0].id, 3)
+        XCTAssertEqual(data[0].name, "W City")
+        XCTAssertEqual(data[0].country, "Test")
     }
 
     func test_hasStoredCities_whenEmpty_returnsFalse() throws {

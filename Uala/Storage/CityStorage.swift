@@ -18,11 +18,14 @@ final class CityStorage: CityStorageProtocol {
     }
     
     // MARK: - Internal Methods
-    func fetchPagedCitiesFromCoreData(page: Int, pageSize: Int) throws -> [City] {
+    func fetchPagedCitiesFromCoreData(prefix: String, page: Int, pageSize: Int) throws -> [City] {
         let request: NSFetchRequest<CityEntity> = CityEntity.fetchRequest()
         request.fetchOffset = page * pageSize
         request.fetchLimit = pageSize
-        //request.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
+        if !prefix.isEmpty {
+            request.predicate = NSPredicate(format: "name BEGINSWITH[cd] %@", prefix)
+        }
+        request.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
 
         let results = try context.fetch(request)
         return results.map {

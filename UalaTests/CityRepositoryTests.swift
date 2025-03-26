@@ -27,7 +27,7 @@ final class CityRepositoryTests: XCTestCase {
         }
         mockStorage.stored = false
 
-        let result = try await repository.fetchCities(page: 0, pageSize: 5)
+        let result = try await repository.fetchCities(prefix: "", page: 0, pageSize: 5)
 
         XCTAssertEqual(result.count, 5)
         XCTAssertEqual(mockStorage.saveCalled, true)
@@ -40,8 +40,8 @@ final class CityRepositoryTests: XCTestCase {
         }
         mockStorage.stored = false
 
-        let _ = try await repository.fetchCities(page: 0, pageSize: 10)
-        let cached = try await repository.fetchCities(page: 0, pageSize: 5)
+        let _ = try await repository.fetchCities(prefix: "", page: 0, pageSize: 10)
+        let cached = try await repository.fetchCities(prefix: "", page: 0, pageSize: 5)
         
         XCTAssertFalse(mockStorage.fetchCalled)
         XCTAssertEqual(mockStorage.saveCalled, true)
@@ -52,10 +52,24 @@ final class CityRepositoryTests: XCTestCase {
         mockStorage.stored = true
         mockStorage.stubbedCities = [.init(id: 1, country: "AR", name: "X", coord: .init(lat: 0, lon: 0))]
 
-        let result = try await repository.fetchCities(page: 0, pageSize: 10)
+        let result = try await repository.fetchCities(prefix: "", page: 0, pageSize: 10)
 
         XCTAssertEqual(result.first?.id, 1)
         XCTAssertTrue(mockStorage.fetchCalled)
+    }
+    
+    func test_fetchCities_withCachedServiceData_returnsFilteredData() async throws {
+        mockService.cities = ["AA", "BA", "ZZ", "BC", "AB", "CC"].enumerated().map { index, letters in
+            City(id: index, country: "X", name: "City \(letters)", coord: .init(lat: 0, lon: 0))
+        }
+        mockStorage.stored = false
+
+        let result = try await repository.fetchCities(prefix: "City B", page: 0, pageSize: 5)
+        
+        XCTAssertFalse(mockStorage.fetchCalled)
+        XCTAssertEqual(mockStorage.saveCalled, true)
+        XCTAssertEqual(result.count, 2)
+        XCTAssertEqual(result.map(\.name), ["City BA", "City BC"])
     }
 }
 
@@ -73,7 +87,7 @@ final class MockCityStorage: CityStorageProtocol {
     var fetchCalled = false
     var stubbedCities: [City] = []
 
-    func fetchPagedCitiesFromCoreData(page: Int, pageSize: Int) throws -> [City] {
+    func fetchPagedCitiesFromCoreData(prefix: String, page: Int, pageSize: Int) throws -> [City] {
         fetchCalled = true
         return stubbedCities
     }

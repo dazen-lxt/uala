@@ -8,5 +8,5 @@
 import Combine
 
 protocol CityRepositoryProtocol {
-    func fetchCities(page: Int, pageSize: Int) async throws -> [City]
+    func fetchCities(prefix: String, page: Int, pageSize: Int) async throws -> [City]
 }

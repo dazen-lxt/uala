@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct CityService: CityServiceProtocol {
+final class CityService: CityServiceProtocol {
     
     // MARK: - Private Properties
     private let baseURL: String = "https://gist.githubusercontent.com/"

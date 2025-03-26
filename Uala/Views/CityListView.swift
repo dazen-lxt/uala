@@ -11,7 +11,6 @@ struct CityListView: View {
     
     // MARK: - Properties
     @ObservedObject private var cityListViewModel: CityListViewModel
-    private let preloadOffset = 5
     
     // MARK: - Initializer
     init(cityListViewModel: CityListViewModel) {
@@ -20,35 +19,38 @@ struct CityListView: View {
     
     // MARK: - Body
     var body: some View {
-        List {
-            ForEach(cityListViewModel.cities.indices, id: \.self) { index in
-                let city = cityListViewModel.cities[index]
-                Text(city.name)
-                    .onAppear {
-                        preloadIfNeeded(for: index)
+        NavigationStack {
+            ZStack {
+                List {
+                    ForEach(cityListViewModel.cities.indices, id: \.self) { index in
+                        let city = $cityListViewModel.cities[index]
+                        CityCellView(city: city)
+                            .onAppear {
+                                Task {
+                                    await cityListViewModel.loadMoreIfNeeded(for: index)
+                                }
+                            }
                     }
+                }
+                .searchable(text: $cityListViewModel.filterTerm, prompt: "Search")
+                if cityListViewModel.isFetching {
+                    ProgressView().padding()
+                } else if cityListViewModel.cities.isEmpty {
+                    Text("No cities found").padding()
+                }
+                
             }
-        }
-        .overlay {
-            if cityListViewModel.isLoading && cityListViewModel.cities.isEmpty {
-                ProgressView().padding()
+            .task {
+                await cityListViewModel.loadCities(reset: false)
             }
+            .navigationTitle("Cities")
         }
-        .task {
-            await cityListViewModel.loadMoreCities()
-        }
-    }
-    
-    // MARK - Private Helpers
-    func preloadIfNeeded(for index: Int) {
-        if index >= cityListViewModel.cities.count - preloadOffset {
-            Task {
-                await cityListViewModel.loadMoreCities()
-            }
-        }
+        
     }
 }
 
 #Preview {
-    AppContainer().makeCityListView()
+    let cityRepostiory = MockCityRepository(totalCities: 200)
+    let cityListViewModel = CityListViewModel(cityRepostiory: cityRepostiory)
+    CityListView(cityListViewModel: cityListViewModel)
 }
