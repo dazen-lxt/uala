@@ -7,6 +7,6 @@
 
 import Combine
 
-protocol CityStorageProtocol {
+protocol CityRepositoryProtocol {
     func fetchCities(page: Int, pageSize: Int) async throws -> [City]
 }

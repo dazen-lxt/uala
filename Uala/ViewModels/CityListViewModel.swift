@@ -14,13 +14,13 @@ class CityListViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     
     // MARK: - Private Properties
-    private let cityStorage: CityStorageProtocol
+    private let cityRepostiory: CityRepositoryProtocol
     private var nextPage = 0
     private let pageSize = 20
     
     // MARK: - Initializer
-    init(cityStorage: CityStorageProtocol) {
-        self.cityStorage = cityStorage
+    init(cityRepostiory: CityRepositoryProtocol) {
+        self.cityRepostiory = cityRepostiory
     }
     
     // MARK: - Internal Methods
@@ -31,7 +31,7 @@ class CityListViewModel: ObservableObject {
         defer { isLoading = false }
         
         do {
-            let data = try await cityStorage.fetchCities(page: nextPage, pageSize: pageSize)
+            let data = try await cityRepostiory.fetchCities(page: nextPage, pageSize: pageSize)
             nextPage += 1
             self.cities.append(contentsOf: data)
         } catch {

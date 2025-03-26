@@ -7,10 +7,13 @@
 
 struct AppContainer {
     
+    private let coreDataStack = CoreDataStack()
+    
     func makeCityListView() -> CityListView {
         let cityService = CityService()
-        let cityStorage = CityStorage(cityService: cityService)
-        let cityListViewModel = CityListViewModel(cityStorage: cityStorage)
+        let cityStorage = CityStorage(context: coreDataStack.context)
+        let cityRepostiory = CityRepository(cityService: cityService, cityStorage: cityStorage)
+        let cityListViewModel = CityListViewModel(cityRepostiory: cityRepostiory)
         return CityListView(cityListViewModel: cityListViewModel)
     }
 }

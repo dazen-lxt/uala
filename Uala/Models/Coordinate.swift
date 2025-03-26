@@ -6,6 +6,6 @@
 //
 
 struct Coordinate: Codable, Hashable {
-    var lon: Double
     var lat: Double
+    var lon: Double
 }
