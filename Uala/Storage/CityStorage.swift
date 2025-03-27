@@ -23,9 +23,9 @@ final class CityStorage: CityStorageProtocol {
         request.fetchOffset = page * pageSize
         request.fetchLimit = pageSize
         if !prefix.isEmpty {
-            request.predicate = NSPredicate(format: "name BEGINSWITH[cd] %@", prefix)
+            request.predicate = NSPredicate(format: "searchKey BEGINSWITH[cd] %@", prefix)
         }
-        request.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
+        request.sortDescriptors = [NSSortDescriptor(key: "searchKey", ascending: true)]
 
         let results = try context.fetch(request)
         return results.map {
@@ -45,14 +45,15 @@ final class CityStorage: CityStorageProtocol {
         return count > 0
     }
     
-    func saveCities(_ cities: [City]) {
-        context.perform { [weak self] in
+    func saveCities(_ cities: [City]) async {
+        await context.perform { [weak self] in
             guard let self else { return }
             for city in cities {
                 let entity = CityEntity(context: context)
                 entity.id = Int64(city.id)
                 entity.name = city.name
                 entity.country = city.country
+                entity.searchKey = city.searchKey
                 entity.latitude = city.coord.lat
                 entity.longitude = city.coord.lon
             }

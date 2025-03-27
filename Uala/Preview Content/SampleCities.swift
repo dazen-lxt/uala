@@ -17,14 +17,14 @@ extension City {
         ),
         City(
             id: 2,
-            country: "AR",
-            name: "Córdoba",
+            country: "CO",
+            name: "Medellín",
             coord: Coordinate(lat: -31.4201, lon: -64.1888)
         ),
         City(
             id: 3,
-            country: "AR",
-            name: "Rosario",
+            country: "CO",
+            name: "Bogotá",
             coord: Coordinate(lat: -32.9442, lon: -60.6505)
         ),
         City(

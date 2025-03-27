@@ -15,7 +15,7 @@ struct CityCellView: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text("\(city.name), \(city.country)")
+                Text(city.searchKey)
                     .font(.headline)
                 Text("Lat: \(city.coord.lat), Lon: \(city.coord.lon)")
                     .font(.subheadline)

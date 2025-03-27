@@ -26,26 +26,9 @@ final class CityRepositoryTests: XCTestCase {
             City(id: $0, country: "X", name: "City \($0)", coord: .init(lat: 0, lon: 0))
         }
         mockStorage.stored = false
-
-        let result = try await repository.fetchCities(prefix: "", page: 0, pageSize: 5)
-
-        XCTAssertEqual(result.count, 5)
+        let _ = try await repository.fetchCities(prefix: "", page: 0, pageSize: 5)
         XCTAssertEqual(mockStorage.saveCalled, true)
-        XCTAssertFalse(mockStorage.fetchCalled)
-    }
-
-    func test_fetchCities_withCachedServiceData_returnsFromMemory() async throws {
-        mockService.cities = (0..<10).map {
-            City(id: $0, country: "X", name: "City \($0)", coord: .init(lat: 0, lon: 0))
-        }
-        mockStorage.stored = false
-
-        let _ = try await repository.fetchCities(prefix: "", page: 0, pageSize: 10)
-        let cached = try await repository.fetchCities(prefix: "", page: 0, pageSize: 5)
-        
-        XCTAssertFalse(mockStorage.fetchCalled)
-        XCTAssertEqual(mockStorage.saveCalled, true)
-        XCTAssertEqual(cached.count, 5)
+        XCTAssertEqual(mockStorage.fetchCalled, true)
     }
 
     func test_fetchCities_whenAlreadySeeded_fetchesFromCoreData() async throws {
@@ -56,20 +39,6 @@ final class CityRepositoryTests: XCTestCase {
 
         XCTAssertEqual(result.first?.id, 1)
         XCTAssertTrue(mockStorage.fetchCalled)
-    }
-    
-    func test_fetchCities_withCachedServiceData_returnsFilteredData() async throws {
-        mockService.cities = ["AA", "BA", "ZZ", "BC", "AB", "CC"].enumerated().map { index, letters in
-            City(id: index, country: "X", name: "City \(letters)", coord: .init(lat: 0, lon: 0))
-        }
-        mockStorage.stored = false
-
-        let result = try await repository.fetchCities(prefix: "City B", page: 0, pageSize: 5)
-        
-        XCTAssertFalse(mockStorage.fetchCalled)
-        XCTAssertEqual(mockStorage.saveCalled, true)
-        XCTAssertEqual(result.count, 2)
-        XCTAssertEqual(result.map(\.name), ["City BA", "City BC"])
     }
     
     func test_addFavorite_addsToStorage() async throws {

@@ -9,7 +9,7 @@ protocol CityStorageProtocol {
     // MARK: - Cities
     func fetchPagedCitiesFromCoreData(prefix: String, page: Int, pageSize: Int) throws -> [City]
     func hasStoredCities() throws -> Bool
-    func saveCities(_ cities: [City])
+    func saveCities(_ cities: [City]) async
     
     // MARK: - Favorites
     func fetchFavorites() async throws -> [Int]

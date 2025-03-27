@@ -10,6 +10,9 @@ struct City: Codable, Identifiable, Hashable {
     var country: String
     var name: String
     var coord: Coordinate
+    var searchKey: String {
+        "\(name), \(country)"
+    }
     
     enum CodingKeys: String, CodingKey {
         case id = "_id"
