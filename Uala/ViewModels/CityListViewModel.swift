@@ -15,6 +15,7 @@ final class CityListViewModel: ObservableObject {
     @Published var isFetching: Bool = false
     @Published var filterTerm: String = ""
     @Published var favorites: Set<Int> = []
+    @Published var selectedCity: City?
     
     // MARK: - Private Properties
     private let cityRepostiory: CityRepositoryProtocol
