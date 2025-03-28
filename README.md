@@ -24,6 +24,22 @@ Proveer una solución mobile intuitiva y eficiente para explorar ciudades del mu
 
 ---
 
+## 🖼️ Capturas de Pantalla
+
+<h3>Pantalla Principal</h3>
+<img src="Screenshots/cities.png" alt="Pantalla Principal" width="300"/>
+
+<h3>Mapa de Ciudad</h3>
+<img src="Screenshots/map.png" alt="Mapa" width="300"/>
+
+<h3>Buscador</h3>
+<img src="Screenshots/filtered_cities.png" alt="Buscador" width="300"/>
+
+<h3>Modo Landscape</h3>
+<img src="Screenshots/landscape.png" alt="Modo Landscape" height="300"/>
+
+---
+
 ## 🧪 Identificadores para UI Tests
 
 | Identificador        | Elemento                           |
