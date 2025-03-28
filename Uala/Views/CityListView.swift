@@ -89,6 +89,7 @@ struct CityListView: View {
                             }
                         }
                     }
+                    .accessibilityIdentifier("cityCell_\(city.id)")
                     .onAppear {
                         Task {
                             await cityListViewModel.loadMoreIfNeeded(for: index)
@@ -97,7 +98,7 @@ struct CityListView: View {
 
                     
                 }
-            }
+            }.accessibilityIdentifier("cityList")
             if cityListViewModel.isFetching {
                 ProgressView().padding()
             } else if cityListViewModel.cities.isEmpty {
@@ -105,6 +106,7 @@ struct CityListView: View {
                 Text("No cities found")
                     .foregroundColor(.secondary)
                     .font(.headline)
+                    .accessibilityIdentifier("emptyMessage")
                 Spacer()
             }
         }

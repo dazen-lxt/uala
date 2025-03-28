@@ -37,6 +37,7 @@ struct CityMapView: View {
                 )
             )
         }
+        .accessibilityIdentifier("cityMap")
         .navigationTitle(city.name)
         .navigationBarTitleDisplayMode(.inline)
     }
